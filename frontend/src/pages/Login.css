@@ -1,0 +1,415 @@
+/* =========================================
+   1. BACKGROUND & 3D ANIMATION STYLES
+   ========================================= */
+.login-page-body {
+    background-color: #131314;
+    color: #e3e3e3;
+    overflow-y: scroll; 
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+    height: 100vh;
+    position: relative;
+    font-family: 'Inter', sans-serif;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+}
+
+.hero-section {
+    perspective: 1200px; /* 3D perspective moved here so position fixed is not broken on body descendants */
+}
+
+.login-page-body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #131314; }
+::-webkit-scrollbar-thumb { background: #444746; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #5e6061; }
+
+/* PARTICLES */
+.particle { position: absolute; background: #ffffff; border-radius: 50%; opacity: 0.15; animation: float-up linear infinite; }
+@keyframes float-up { from { transform: translateY(100vh); } to { transform: translateY(-100px); } }
+
+/* 3D SCENE CONTAINER */
+.scene {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform-style: preserve-3d;
+    transform: translate(-50%, -50%);
+    width: 0;
+    height: 0;
+    z-index: 0; /* Background me rahe */
+}
+
+/* RINGS ANIMATION */
+.ring-system {
+    position: relative;
+    transform-style: preserve-3d;
+    animation: spin 60s infinite linear;
+}
+
+.core {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 140px;
+    height: 140px;
+    background: #1e1f20;
+    border: 1px solid #444746;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 60px rgba(76, 141, 246, 0.15), inset 0 0 20px rgba(0,0,0,0.5);
+    z-index: 10;
+    animation: pulse 4s infinite ease-in-out;
+}
+
+/* ORBIT ITEMS (AI CARDS) */
+.orbit-item {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform-style: preserve-3d;
+    width: 90px;
+    height: 90px;
+    margin-left: -45px; 
+    margin-top: -45px;
+}
+
+.ai-card {
+    width: 100%;
+    height: 100%;
+    background: #1e1f20;
+    border: 1px solid #444746;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #e3e3e3;
+    font-size: 11px;
+    font-weight: 500;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    animation: counter-spin 60s infinite linear; /* Counter rotation to keep text straight */
+    transition: all 0.3s ease;
+}
+
+.ai-card:hover {
+    transform: scale(1.15);
+    background: #2d2e2f;
+    border-color: #e3e3e3;
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    z-index: 100;
+}
+
+.ai-icon { 
+    width: 32px; height: 32px; margin-bottom: 6px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; background: transparent;
+}
+
+/* Real brand logo img tags inside ai-card */
+.ai-card img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    margin-bottom: 6px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+/* Specific Colors for AI Icons — accent glow on card hover */
+.gpt .ai-icon { color: #10a37f; border: 1px solid #10a37f; }
+.gemini .ai-icon { color: #4b90ff; border: 1px solid #4b90ff; }
+.claude .ai-icon { color: #d97757; border: 1px solid #d97757; }
+.perplexity .ai-icon { color: #22b8cf; border: 1px solid #22b8cf; }
+.deepseek .ai-icon { color: #6366f1; border: 1px solid #6366f1; }
+.grok .ai-icon { color: #ffffff; border: 1px solid #ffffff; }
+
+/* Keyframe Animations */
+@keyframes spin { 0% { transform: rotateY(0deg) rotateX(12deg); } 100% { transform: rotateY(360deg) rotateX(12deg); } }
+@keyframes counter-spin { 0% { transform: rotateX(-12deg) rotateY(360deg); } 100% { transform: rotateX(-12deg) rotateY(0deg); } }
+@keyframes pulse { 0%, 100% { box-shadow: 0 0 40px rgba(76, 141, 246, 0.1); border-color: #444746; } 50% { box-shadow: 0 0 60px rgba(168, 199, 250, 0.2); border-color: #a8c7fa; } }
+
+
+/* =========================================
+   2. NEW LOGIN POPUP STYLES (Exact Gemini Look)
+   ========================================= */
+
+/* Social Buttons (Google, Apple) */
+.social-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 12px 20px;
+    background: transparent;
+    border: 1px solid #444746;
+    border-radius: 9999px; /* Pill shape */
+    color: #e3e3e3;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    position: relative;
+    cursor: pointer;
+}
+
+.social-btn:hover {
+    background-color: #2d2e2f;
+    border-color: #8e8e8e;
+}
+
+/* Input Fields */
+.input-field {
+    width: 100%;
+    padding: 16px;
+    background-color: transparent;
+    border: 1px solid #444746;
+    border-radius: 12px;
+    color: white;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.input-field:focus {
+    border-color: #a8c7fa; /* Gemini Blue focus */
+    background-color: #131314;
+}
+
+/* Continue/Submit Button */
+.action-btn {
+    width: 100%;
+    padding: 14px;
+    background-color: #e3e3e3;
+    color: #1f1f1f;
+    border: none;
+    border-radius: 9999px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+}
+
+.action-btn:hover {
+    background-color: white;
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+/* Fade In Animation for Popup Steps */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* =========================================
+   3. SCROLL SNAP SECTIONS & INTERACTIVE STYLES
+   ========================================= */
+.snap-section {
+    width: 100%;
+    height: 100vh;
+    scroll-snap-align: start;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border-bottom: 1px solid rgba(68, 71, 70, 0.3);
+}
+
+/* Dot Grid Background Overlay */
+.bg-dot-grid {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-size: 24px 24px;
+}
+
+/* Scroll Indicator Dots */
+.scroll-dots {
+    position: fixed;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    z-index: 40;
+}
+
+.scroll-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #444746;
+    border: 1px solid transparent;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+}
+
+.scroll-dot:hover {
+    background-color: #8e8e8e;
+    transform: scale(1.2);
+}
+
+.scroll-dot.active {
+    background: linear-gradient(135deg, #00d4aa, #0088ff);
+    transform: scale(1.3);
+    box-shadow: 0 0 10px rgba(0, 212, 170, 0.4);
+}
+
+/* Spotlight / Mouse Glow Effect */
+.spotlight-glow {
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    opacity: 0.4;
+    transition: opacity 0.3s ease;
+}
+
+/* Mockup UI Window */
+.mockup-window {
+    background: #1e1f20;
+    border: 1px solid #444746;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    position: relative;
+    width: 100%;
+}
+
+.mockup-window:hover {
+    border-color: #00d4aa;
+    box-shadow: 0 0 30px rgba(0, 212, 170, 0.15);
+}
+
+.mockup-header {
+    background: #18191a;
+    border-bottom: 1px solid #444746;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mockup-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+/* Custom Accent Badges */
+.accent-badge {
+    background: #2d2e2f;
+    border: 1px solid #444746;
+    color: #00d4aa;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+/* Accent Gradient Text */
+.text-gradient {
+    background: linear-gradient(to right, #00d4aa, #0088ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Tokens Section Visuals */
+.token-card {
+    background: #1e1f20;
+    border: 1px solid #444746;
+    border-radius: 20px;
+    padding: 24px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.token-card:hover {
+    border-color: #0088ff;
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 136, 255, 0.1);
+}
+
+.token-icon-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(0, 212, 170, 0.1);
+    border: 1px solid rgba(0, 212, 170, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #00d4aa;
+    font-size: 18px;
+    margin-bottom: 16px;
+}
+
+.token-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #2d2e2f;
+    border-radius: 999px;
+    overflow: hidden;
+    position: relative;
+}
+
+.token-progress-fill {
+    height: 100%;
+    background: linear-gradient(to right, #00d4aa, #0088ff);
+    border-radius: 999px;
+    width: 25%; /* Dummy 25% progress */
+    transition: width 1s ease-in-out;
+}
+
+/* Profile Ring Gradient */
+.profile-ring {
+    background: linear-gradient(135deg, #4c8df6, #9b51e0, #ea4335);
+    padding: 3px;
+    border-radius: 50%;
+    box-shadow: 0 8px 24px rgba(155, 81, 224, 0.2);
+}
+
+/* Social Button Links */
+.social-link-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #2d2e2f;
+    border: 1px solid #444746;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #e3e3e3;
+    transition: all 0.2s ease;
+}
+
+.social-link-btn:hover {
+    background: #3d3e3f;
+    border-color: #00d4aa;
+    color: #00d4aa;
+    transform: translateY(-2px);
+}
+
+/* Entrance Animations Scroll Toggled */
+.section-animate {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.section-animate.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}

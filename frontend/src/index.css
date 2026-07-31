@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Agar font global chahiye to ye add kar sakte ho */
+body {
+  @apply bg-gemini-bg text-gemini-text;
+}
