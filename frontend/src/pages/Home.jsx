@@ -213,6 +213,7 @@ const finalDeleteAction = () => {
   const [visibleModels, setVisibleModels] = useState({ chatgpt: true, gemini: true, claude: true, perplexity: true, deepseek: true, grok: true });
   const [isConclusionExpanded, setIsConclusionExpanded] = useState(false);
   const [credits, setCredits] = useState(0); 
+  const [conclusionText, setConclusionText] = useState("Waiting for AI responses...");
   const [showCreditModal, setShowCreditModal] = useState(false);
 
   const [chatData, setChatData] = useState({});
@@ -365,40 +366,29 @@ const togglePinChat = (e, item) => {
     setOpenMenuId(null); // Menu band kar do
 };
 
-const calculateConclusion = (chatData) => {
+const calculateConclusion = async (chatData) => {
     const allAnswers = Object.values(chatData)
         .map(modelChats => modelChats[modelChats.length - 1]?.ai)
         .filter(answer => answer && answer !== "Thinking..." && answer !== "Waiting...");
+
+    const lastQuery = Object.values(chatData)
+        .map(modelChats => modelChats[modelChats.length - 1]?.user)
+        .find(query => query);
 
     if (allAnswers.length < 2) {
         return "Aggregating data... Please wait for at least two AI responses to generate a conclusion.";
     }
 
-    // Professional keywords extraction logic
-    const stopWords = new Set(['the', 'a', 'an', 'is', 'are', 'was', 'were', 'to', 'in', 'of', 'and', 'that', 'with', 'this', 'for']);
-    let wordMap = {};
-
-    allAnswers.forEach(ans => {
-        const words = new Set(ans.toLowerCase().match(/\b\w+\b/g));
-        words.forEach(word => {
-            if (!stopWords.has(word) && word.length > 2) {
-                wordMap[word] = (wordMap[word] || 0) + 1;
-            }
+    try {
+        const res = await axios.post(`${API_BASE}/api/synthesize`, {
+            allAnswers,
+            originalQuery: lastQuery || "Not available"
         });
-    });
-
-    const totalModels = allAnswers.length;
-    // 40% Consensus Threshold
-    const commonWords = Object.keys(wordMap).filter(word => (wordMap[word] / totalModels) >= 0.4);
-
-    if (commonWords.length === 0) {
-        return "Analysis Complete: No significant consensus found across the different AI models.";
+        return res.data.conclusion;
+    } catch (error) {
+        console.error("Synthesis Error:", error);
+        return "### Synthesis Failed\n\nThe Master Synthesizer could not generate a conclusion at this time. Please try again later.";
     }
-
-    // Capitalizing keywords for better presentation
-    const formattedKeywords = commonWords.map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(', ');
-
-    return `### Consensus Report\n\nBased on a comparison of multiple AI perspectives, there is a **40% or higher consensus** on the following key points:\n\n**Keywords:** ${formattedKeywords}.`;
 };
 
 // 3. fetchHistoryList function ko update karein (taaki reload par renamed title dikhe)
@@ -602,6 +592,24 @@ const handleSendMessage = async () => {
     return () => window.removeEventListener('click', closeMenus);
   }, []);
   useEffect(() => { Object.keys(chatEndRefs.current).forEach(modelId => { if (chatEndRefs.current[modelId]) chatEndRefs.current[modelId].scrollIntoView({ behavior: 'smooth' }); }); }, [chatData]);
+
+  // --- 🧠 Asynchronous Conclusion Synthesis ---
+  useEffect(() => {
+    const hasResponses = Object.values(chatData).some(
+      (chats) => chats.length > 0 && chats[chats.length - 1]?.ai && chats[chats.length - 1].ai !== "Thinking..."
+    );
+
+    if (hasResponses) {
+      setConclusionText("Synthesizing Master Conclusion...");
+      const fetchConclusion = async () => {
+        const result = await calculateConclusion(chatData);
+        setConclusionText(result);
+      };
+      fetchConclusion();
+    } else {
+      setConclusionText("Waiting for AI responses...");
+    }
+  }, [chatData]);
 
   useEffect(() => {
     const slider = scrollContainerRef.current;
@@ -2317,17 +2325,18 @@ const handleSendMessage = async () => {
                                 style={{ borderColor: hoveredCard === 'conclusion' ? 'rgba(168,85,247,0.5)' : undefined }}
                             >
                                 <div className="px-4 py-3 border-b border-purple-500/20 flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <div className="p-1.5 bg-purple-500 rounded-lg text-white"><Edit3 size={16} /></div>
+                                    <div className="flex items-center gap-4">
                                         <h3 className="text-sm font-bold text-purple-400 uppercase tracking-tighter">Conclusion</h3>
+                                        <div className="flex items-center -space-x-1.5">
+                                            {models.map(m => (
+                                                <ModelIcon key={m.id} model={m.id} className="w-7 h-7 border-2 border-[var(--surface-color)] rounded-full" />
+                                            ))}
+                                        </div>
                                     </div>
-                                    <span className="text-[10px] text-purple-500 opacity-0 group-hover:opacity-100 transition-opacity font-bold">Double Click to Expand</span>
                                 </div>
                                 <div className="flex-1 m-1 rounded-xl p-3 overflow-y-auto text-sm leading-relaxed custom-scrollbar bg-white/5">
                                     {Object.keys(chatData).length > 0 ? (
-                                        <div className="markdown-body opacity-90 text-[var(--text-primary)]">
-                                            <ReactMarkdown>{calculateConclusion(chatData)}</ReactMarkdown>
-                                        </div>
+                                        <div className="markdown-body opacity-90 text-[var(--text-primary)]" dangerouslySetInnerHTML={{ __html: conclusionText.replace(/\n/g, '<br />') }} />
                                     ) : (
                                         <p className="opacity-40 mt-10 text-center text-xs uppercase tracking-widest text-[var(--text-primary)]">
                                             Waiting for AI responses...
@@ -2482,11 +2491,7 @@ const handleSendMessage = async () => {
                     </div>
                     <div className="flex-1 overflow-y-auto p-8 md:p-20">
                         <div className="max-w-4xl mx-auto bg-purple-500/5 border border-purple-500/20 p-10 rounded-[40px] shadow-2xl">
-                            <div className="markdown-body text-lg leading-loose text-[var(--text-primary)]">
-                                <ReactMarkdown>
-                                    {calculateConclusion(chatData)}
-                                </ReactMarkdown>
-                            </div>
+                            <div className="markdown-body text-lg leading-loose text-[var(--text-primary)]" dangerouslySetInnerHTML={{ __html: conclusionText.replace(/\n/g, '<br />') }} />
                         </div>
                     </div>
                 </div>

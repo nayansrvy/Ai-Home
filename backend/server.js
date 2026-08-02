@@ -321,6 +321,42 @@ app.post('/api/chat', async (req, res) => {
     }
 });
 
+// ==========================================
+// 🧠 MASTER SYNTHESIZER ROUTE
+// ==========================================
+
+app.post('/api/synthesize', async (req, res) => {
+    const { allAnswers, originalQuery } = req.body;
+
+    if (!allAnswers || allAnswers.length < 2) {
+        return res.status(400).json({ conclusion: "Need at least two model answers to synthesize." });
+    }
+
+    // Construct a detailed prompt for the synthesizer model
+    const synthesisPrompt = `
+        As the Master Synthesizer for AIHome, your objective is to review responses from 6 different AI models (ChatGPT, Gemini, DeepSeek, Perplexity, Claude, and Grok) regarding a user's prompt and generate a single, highly accurate, and comprehensive "Master Conclusion."
+
+        ### USER'S ORIGINAL PROMPT:
+        "${originalQuery}"
+
+        ### AI RESPONSES TO SYNTHESIZE:
+        ${allAnswers.map((ans, i) => `--- Model ${i + 1} Response ---\n${ans}\n`).join('\n')}
+
+        ### INSTRUCTIONS:
+        1.  **Unified Answer**: Provide a clear, direct, and well-structured final answer. Do not just summarize; give the ultimate response that combines the strengths of all models.
+        2.  **Fact-Checking & Consensus**: Identify points where models agree. If models conflict, prioritize facts from search-enabled or strong reasoning models.
+        3.  **Structure & Clarity**: Use bold headings, bullet points, and clean markdown formatting. If code is involved, provide the most optimized, bug-free unified version.
+        4.  **Tone & Style**: Be concise, direct, authoritative, and helpful. Avoid meta-commentary like "Model 1 said this..." unless explicitly contrasting unique insights.
+    `;
+
+    try {
+        const conclusion = await callGroq("llama-3.3-70b-versatile", synthesisPrompt, process.env.GROQ_API_KEY, "You are the Master Synthesizer for AIHome.");
+        res.json({ conclusion });
+    } catch (error) {
+        res.status(500).json({ conclusion: "Error: The Master Synthesizer is currently unavailable." });
+    }
+});
+
 // Dummy Payment Success Route
 app.post('/api/add-credits', async (req, res) => {
     const { userId, amount } = req.body;
