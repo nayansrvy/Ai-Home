@@ -2625,6 +2625,7 @@ motion.aside, aside {
     justify-content: center;
     cursor: pointer;
     width: 32px;
+    flex-shrink: 0;
     height: 32px;
     border-radius: 50%;
     transition: background 0.15s, color 0.15s;
@@ -2939,6 +2940,7 @@ motion.aside, aside {
     justify-content: center;
     cursor: pointer;
     width: 32px;
+    flex-shrink: 0;
     height: 32px;
     border-radius: 50%;
     transition: background 0.15s, color 0.15s;
@@ -3410,6 +3412,7 @@ motion.aside, aside {
     opacity: 0.6;
     transition: opacity 0.15s ease, background 0.15s ease;
 }
+
 .perplexity-back-btn:hover,
 .deepseek-back-btn:hover,
 .grok-back-btn:hover {
@@ -3431,6 +3434,12 @@ motion.aside, aside {
     z-index: 30;
 }
 .perplexity-topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.deepseek-topbar-left,
+.grok-topbar-left {
     display: flex;
     align-items: center;
     gap: 4px;
@@ -3527,6 +3536,7 @@ motion.aside, aside {
     cursor: pointer;
     user-select: none;
     transition: background 0.15s ease;
+    flex-shrink: 0;
 }
 .gemini-model-dropdown-wrapper:hover,
 .claude-model-dropdown-wrapper:hover,
