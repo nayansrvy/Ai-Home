@@ -106,6 +106,7 @@ const Login = () => {
       const res = await axios.post("http://127.0.0.1:5000/api/auth-verify", { idToken });
       
       localStorage.setItem("token", res.data.token);
+      localStorage.setItem("userPhotoURL", result.user.photoURL); // Store the photo URL
       localStorage.setItem("userId", res.data.user.id);
       localStorage.setItem("userEmail", res.data.user.email);
       navigate('/');

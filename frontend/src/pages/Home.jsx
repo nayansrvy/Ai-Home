@@ -567,6 +567,7 @@ const handleSendMessage = async () => {
   const handleLogout = () => { localStorage.removeItem('userId'); localStorage.removeItem('token'); navigate('/login'); };
   const toggleTheme = () => {
     const newTheme = theme === 'Dark' ? 'Light' : 'Dark';
+    localStorage.removeItem('userPhotoURL'); // Clear photo URL on logout
     setTheme(newTheme);
     // localStorage mein save kar raha hai
     localStorage.setItem('app-theme', newTheme);
@@ -1201,7 +1202,13 @@ const handleSendMessage = async () => {
                     </div>
                 )}
                 <button onClick={(e) => toggleMenu('user', e)} className={`flex items-center gap-3 p-2 rounded-full w-full text-left transition ${theme === 'Light' ? 'hover:bg-gray-100' : 'hover:bg-white/5'}`}>
-                    <div className="w-8 h-8 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-xs text-white">U</div>
+                    {localStorage.getItem('userPhotoURL') ? (
+                        <img src={localStorage.getItem('userPhotoURL')} alt="User Profile" className="w-8 h-8 rounded-full flex-shrink-0 object-cover" />
+                    ) : (
+                        <div className="w-8 h-8 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-xs text-white">
+                            {localStorage.getItem('userEmail') ? localStorage.getItem('userEmail').charAt(0).toUpperCase() : 'U'}
+                        </div>
+                    )}
                     {!isSidebarCollapsed && <span className={`text-sm font-medium opacity-90 ${theme === 'Light' ? 'text-gray-800' : 'text-white'}`}>User</span>}
                 </button>
                 </div>
