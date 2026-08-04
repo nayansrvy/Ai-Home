@@ -1164,11 +1164,33 @@ const handleSendMessage = async () => {
 
             {/* Sidebar Bottom Part */}
             <div className="p-3 mt-auto space-y-1 relative">
-                <button onClick={() => setShowCreditModal(true)} className={`flex items-center gap-3 py-2 px-3 w-full rounded-full transition opacity-80 hover:opacity-100 ${theme === 'Light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/5'}`}>
-                <span className="text-lg">💎</span>{!isSidebarCollapsed && <span className="text-sm font-medium">Credit Plan</span>}
+                <button 
+                  onClick={() => setShowCreditModal(true)} 
+                  className={`flex items-center gap-3 py-2 px-3 w-full rounded-full transition opacity-80 hover:opacity-100 ${
+                    theme === 'Light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/5'
+                  }`}
+                >
+                  <img 
+                    src="/logos/credit-token.webp" 
+                    alt="Credit Plan" 
+                    className="w-5 h-5 object-contain shrink-0" 
+                  />
+                  {!isSidebarCollapsed && <span className="text-sm font-medium">Credit Plan</span>}
                 </button>
-                <button onClick={(e) => toggleMenu('options', e)} className={`flex items-center gap-3 py-2 px-3 w-full rounded-full transition opacity-80 hover:opacity-100 ${theme === 'Light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/5'}`}>
-                <span className="text-lg">🤖</span>{!isSidebarCollapsed && <span className="text-sm">AI Models</span>}
+
+                {/* AI Models Button */}
+                <button 
+                  onClick={(e) => toggleMenu('options', e)} 
+                  className={`flex items-center gap-3 py-2 px-3 w-full rounded-full transition opacity-80 hover:opacity-100 ${
+                    theme === 'Light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/5'
+                  }`}
+                >
+                  <img 
+                    src="/logos/ai-models.png" 
+                    alt="AI Models" 
+                    className="w-5 h-5 object-contain shrink-0" 
+                  />
+                  {!isSidebarCollapsed && <span className="text-sm">AI Models</span>}
                 </button>
                 <div className="relative">
                 {activeMenu === 'user' && !isSidebarCollapsed && (
