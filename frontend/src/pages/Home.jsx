@@ -10,6 +10,7 @@ import { motion, AnimatePresence, useSpring, useTransform } from 'framer-motion'
 // Phase 4: Bottom drawers + premium toasts
 import { Drawer } from 'vaul';
 import { toast, Toaster } from 'sonner';
+import AccountSwitcherModal from '../components/AccountSwitcherModal';
 
 
 
@@ -183,6 +184,8 @@ const finalDeleteAction = () => {
   const [pinnedChatIds, setPinnedChatIds] = useState(
     JSON.parse(localStorage.getItem('pinned-chats') || '[]')
   );
+  const [isRecentOpen, setIsRecentOpen] = useState(true);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [chatToDelete, setChatToDelete] = useState(null);
   const [singleModelMode, setSingleModelMode] = useState(null);
@@ -1046,121 +1049,142 @@ const handleSendMessage = async () => {
             {/* Phase 3: Sidebar history list with layoutId sliding pill */}
             <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar px-3 py-2 space-y-0.5">
                 {!isSidebarCollapsed && (
-                  <div className={`text-xs font-medium px-3 py-2 mt-2 uppercase tracking-wider ${
-                    theme === 'Light' ? 'text-gray-500' : 'text-gray-400 opacity-50'
-                  }`}>
-                    Recent
+                  <div 
+                    onClick={() => setIsRecentOpen(prev => !prev)}
+                    className={`group flex items-center justify-between text-xs font-medium px-3 py-2 mt-2 uppercase tracking-wider cursor-pointer rounded-lg transition-colors select-none ${
+                      theme === 'Light' ? 'text-gray-500 hover:bg-gray-100' : 'text-gray-400 opacity-80 hover:bg-white/5'
+                    }`}
+                  >
+                    <span>Recent</span>
+                    <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center">
+                      {isRecentOpen ? (
+                        <ChevronDown size={14} className="text-gray-400" />
+                      ) : (
+                        <ChevronRight size={14} className="text-gray-400" />
+                      )}
+                    </span>
                   </div>
                 )}
 
-                {[...history]
-                  .sort((a, b) => {
-                    const aPinned = pinnedChatIds.includes(a.id);
-                    const bPinned = pinnedChatIds.includes(b.id);
-                    if (aPinned && !bPinned) return -1;
-                    if (!aPinned && bPinned) return 1;
-                    return 0;
-                  })
-                  .map((item) => (
-                    <div
-                      key={item.id}
-                      className="group relative flex items-center justify-between w-full py-2.5 px-3 rounded-full cursor-pointer"
-                      onClick={() => loadSession(item.id)}
-                      onMouseEnter={() => setHoveredHistoryItem(item.id)}
-                      onMouseLeave={() => setHoveredHistoryItem(null)}
+                <AnimatePresence initial={false}>
+                  {isRecentOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.25, ease: 'easeInOut' }}
+                      className="overflow-hidden space-y-0.5"
                     >
-                      {/* Phase 3: Sliding background pill via layoutId */}
-                      <AnimatePresence>
-                        {(sessionId === item.id || hoveredHistoryItem === item.id) && (
-                          <motion.div
-                            key={sessionId === item.id ? 'active' : 'hover'}
-                            layoutId={sessionId === item.id ? 'active-chat-pill' : `hover-pill-${item.id}`}
-                            className={`absolute inset-0 rounded-full ${
-                              sessionId === item.id
-                                ? (theme === 'Light' ? 'bg-gray-200' : 'bg-[#2d2e2f]')
-                                : (theme === 'Light' ? 'bg-gray-100' : 'bg-white/5')
-                            }`}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                          />
-                        )}
-                      </AnimatePresence>
+                      {[...history]
+                        .sort((a, b) => {
+                          const aPinned = pinnedChatIds.includes(a.id);
+                          const bPinned = pinnedChatIds.includes(b.id);
+                          if (aPinned && !bPinned) return -1;
+                          if (!aPinned && bPinned) return 1;
+                          return 0;
+                        })
+                        .map((item) => (
+                          <div
+                            key={item.id}
+                            className="group relative flex items-center justify-between w-full py-2.5 px-3 rounded-full cursor-pointer"
+                            onClick={() => loadSession(item.id)}
+                            onMouseEnter={() => setHoveredHistoryItem(item.id)}
+                            onMouseLeave={() => setHoveredHistoryItem(null)}
+                          >
+                            {/* Phase 3: Sliding background pill via layoutId */}
+                            <AnimatePresence>
+                              {(sessionId === item.id || hoveredHistoryItem === item.id) && (
+                                <motion.div
+                                  key={sessionId === item.id ? 'active' : 'hover'}
+                                  layoutId={sessionId === item.id ? 'active-chat-pill' : `hover-pill-${item.id}`}
+                                  className={`absolute inset-0 rounded-full ${
+                                    sessionId === item.id
+                                      ? (theme === 'Light' ? 'bg-gray-200' : 'bg-[#2d2e2f]')
+                                      : (theme === 'Light' ? 'bg-gray-100' : 'bg-white/5')
+                                  }`}
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  exit={{ opacity: 0 }}
+                                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                                />
+                              )}
+                            </AnimatePresence>
 
-                      <div className="relative flex items-center gap-3 truncate z-10">
-                        <span className={`text-base flex-shrink-0 ${
-                          theme === 'Light' ? 'text-gray-500' : 'opacity-60'
-                        }`}>
-                          {pinnedChatIds.includes(item.id) ? '📌' : '💬'}
-                        </span>
-                        {!isSidebarCollapsed && (
-                          <span className={`text-sm truncate ${
-                            theme === 'Light' ? 'text-gray-800' : 'text-gray-200 opacity-80'
-                          }`}>
-                            {item.title}
-                          </span>
-                        )}
-                      </div>
+                            <div className="relative flex items-center gap-3 truncate z-10">
+                              <span className={`text-base flex-shrink-0 ${
+                                theme === 'Light' ? 'text-gray-500' : 'opacity-60'
+                              }`}>
+                                {pinnedChatIds.includes(item.id) ? '📌' : '💬'}
+                              </span>
+                              {!isSidebarCollapsed && (
+                                <span className={`text-sm truncate ${
+                                  theme === 'Light' ? 'text-gray-800' : 'text-gray-200 opacity-80'
+                                }`}>
+                                  {item.title}
+                                </span>
+                              )}
+                            </div>
 
-                      {!isSidebarCollapsed && (
-                        <button
-                          onClick={(e) => toggleHistoryMenu(e, item.id)}
-                          className={`relative z-10 opacity-0 group-hover:opacity-100 p-1 rounded-full transition-all flex-shrink-0 ${
-                            theme === 'Light' ? 'hover:bg-gray-300 text-gray-700' : 'hover:bg-[#3d3e3f] text-gray-400'
-                          }`}
-                        >
-                          <MoreVertical size={16} />
-                        </button>
-                      )}
+                            {!isSidebarCollapsed && (
+                              <button
+                                onClick={(e) => toggleHistoryMenu(e, item.id)}
+                                className={`relative z-10 opacity-0 group-hover:opacity-100 p-1 rounded-full transition-all flex-shrink-0 ${
+                                  theme === 'Light' ? 'hover:bg-gray-300 text-gray-700' : 'hover:bg-[#3d3e3f] text-gray-400'
+                                }`}
+                              >
+                                <MoreVertical size={16} />
+                              </button>
+                            )}
 
-                      {/* Context menu popup */}
-                      {openMenuId === item.id && (
-                        <div
-                          className={`absolute left-10 top-8 w-52 border rounded-xl shadow-2xl z-[999] py-2 animate-in fade-in zoom-in duration-150 ${
-                            theme === 'Light' ? 'bg-white border-gray-200 text-gray-800' : 'bg-[#1e1f20] border-[#333] text-gray-200'
-                          }`}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <button
-                            onClick={(e) => handleShareChat(e, item)}
-                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
-                              theme === 'Light' ? 'hover:bg-gray-100' : 'hover:bg-[#2d2e2f]'
-                            }`}
-                          >
-                            <Share size={16} className="opacity-70" /> Share conversation
-                          </button>
-                          <button
-                            onClick={(e) => togglePinChat(e, item)}
-                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
-                              theme === 'Light' ? 'hover:bg-gray-100' : 'hover:bg-[#2d2e2f]'
-                            }`}
-                          >
-                            <PinOff size={16} className={`opacity-70 ${pinnedChatIds.includes(item.id) ? 'text-blue-500' : ''}`} />
-                            {pinnedChatIds.includes(item.id) ? 'Unpin' : 'Pin'}
-                          </button>
-                          <button
-                            onClick={(e) => openRenameModal(e, item)}
-                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
-                              theme === 'Light' ? 'hover:bg-gray-100' : 'hover:bg-[#2d2e2f]'
-                            }`}
-                          >
-                            <Edit2 size={16} className="opacity-70" /> Rename
-                          </button>
-                          <div className={`h-[1px] my-1 ${theme === 'Light' ? 'bg-gray-200' : 'bg-[#333]'}`} />
-                          <button
-                            onClick={(e) => confirmDelete(e, item)}
-                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 transition-colors ${
-                              theme === 'Light' ? 'hover:bg-gray-100' : 'hover:bg-[#2d2e2f]'
-                            }`}
-                          >
-                            <Trash2 size={16} /> Delete
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  ))
-                }
+                            {/* Context menu popup */}
+                            {openMenuId === item.id && (
+                              <div
+                                className={`absolute left-10 top-8 w-52 border rounded-xl shadow-2xl z-[999] py-2 animate-in fade-in zoom-in duration-150 ${
+                                  theme === 'Light' ? 'bg-white border-gray-200 text-gray-800' : 'bg-[#1e1f20] border-[#333] text-gray-200'
+                                }`}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <button
+                                  onClick={(e) => handleShareChat(e, item)}
+                                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
+                                    theme === 'Light' ? 'hover:bg-gray-100' : 'hover:bg-[#2d2e2f]'
+                                  }`}
+                                >
+                                  <Share size={16} className="opacity-70" /> Share conversation
+                                </button>
+                                <button
+                                  onClick={(e) => togglePinChat(e, item)}
+                                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
+                                    theme === 'Light' ? 'hover:bg-gray-100' : 'hover:bg-[#2d2e2f]'
+                                  }`}
+                                >
+                                  <PinOff size={16} className={`opacity-70 ${pinnedChatIds.includes(item.id) ? 'text-blue-500' : ''}`} />
+                                  {pinnedChatIds.includes(item.id) ? 'Unpin' : 'Pin'}
+                                </button>
+                                <button
+                                  onClick={(e) => openRenameModal(e, item)}
+                                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
+                                    theme === 'Light' ? 'hover:bg-gray-100' : 'hover:bg-[#2d2e2f]'
+                                  }`}
+                                >
+                                  <Edit2 size={16} className="opacity-70" /> Rename
+                                </button>
+                                <div className={`h-[1px] my-1 ${theme === 'Light' ? 'bg-gray-200' : 'bg-[#333]'}`} />
+                                <button
+                                  onClick={(e) => confirmDelete(e, item)}
+                                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 transition-colors ${
+                                    theme === 'Light' ? 'hover:bg-gray-100' : 'hover:bg-[#2d2e2f]'
+                                  }`}
+                                >
+                                  <Trash2 size={16} /> Delete
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
             </div>
 
             {/* Sidebar Bottom Part */}
@@ -1194,23 +1218,53 @@ const handleSendMessage = async () => {
                   {!isSidebarCollapsed && <span className="text-sm">AI Models</span>}
                 </button>
                 <div className="relative">
-                {activeMenu === 'user' && !isSidebarCollapsed && (
-                    <div className={`glass-panel absolute bottom-full left-0 right-0 mb-3 w-full rounded-xl p-2 z-50 animate-pop-up border ${theme === 'Light' ? 'bg-white border-gray-200 text-gray-800' : 'bg-[#1e1f20] border-gray-600 text-white'}`} onClick={(e) => e.stopPropagation()}>
-                    <div className={`p-2 text-sm border-b mb-2 opacity-70 ${theme === 'Light' ? 'border-gray-200' : 'border-gray-600'}`}>{localStorage.getItem('userEmail') || 'User'}</div>
-                    <button onClick={toggleTheme} className={`w-full flex items-center justify-between p-2 rounded-lg text-sm ${theme === 'Light' ? 'hover:bg-gray-100' : 'hover:bg-white/5'}`}><span>Appearance</span><span className={`text-xs px-2 py-1 rounded ${theme === 'Light' ? 'bg-gray-200 text-gray-700' : 'bg-gray-700 text-white'}`}>{theme}</span></button>
-                    <button onClick={handleLogout} className={`w-full flex items-center gap-3 p-2 rounded-lg text-sm text-red-500 ${theme === 'Light' ? 'hover:bg-gray-100' : 'hover:bg-white/5'}`}>Log out</button>
-                    </div>
-                )}
-                <button onClick={(e) => toggleMenu('user', e)} className={`flex items-center gap-3 p-2 rounded-full w-full text-left transition ${theme === 'Light' ? 'hover:bg-gray-100' : 'hover:bg-white/5'}`}>
+                  <AccountSwitcherModal
+                    isOpen={isAccountModalOpen}
+                    onClose={() => setIsAccountModalOpen(false)}
+                    positionClass="fixed bottom-14 left-4 z-[9999]"
+                    currentUser={{
+                      name: localStorage.getItem('userName') || 'Sarvaiya Nayan',
+                      email: localStorage.getItem('userEmail') || 'sarvaiyanayan0@gmail.com',
+                      avatar: localStorage.getItem('userPhotoURL') || ''
+                    }}
+                    secondaryAccounts={[
+                      {
+                        id: 'acc-2',
+                        name: 'nd sarvaiya',
+                        email: 'ndsarvaiyaa@gmail.com',
+                        avatar: '',
+                        badgeText: 'nd',
+                        badgeBg: 'bg-orange-600'
+                      }
+                    ]}
+                    onSwitchAccount={(account) => {
+                      setIsAccountModalOpen(false);
+                      toast.success(`Switched account to ${account.email}`);
+                    }}
+                    onManageAccount={() => {
+                      toast.info('Redirecting to Google Account Settings...');
+                    }}
+                    onAddAccount={() => {
+                      toast.info('Add account clicked');
+                    }}
+                    onSignOut={() => {
+                      handleLogout();
+                    }}
+                  />
+                  <button 
+                    onClick={() => setIsAccountModalOpen(v => !v)} 
+                    className={`flex items-center gap-3 p-2 rounded-full w-full text-left transition ${theme === 'Light' ? 'hover:bg-gray-100' : 'hover:bg-white/5'}`}
+                    title="Click to switch account"
+                  >
                     {localStorage.getItem('userPhotoURL') ? (
                         <img src={localStorage.getItem('userPhotoURL')} alt="User Profile" className="w-8 h-8 rounded-full flex-shrink-0 object-cover" />
                     ) : (
-                        <div className="w-8 h-8 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-xs text-white">
-                            {localStorage.getItem('userEmail') ? localStorage.getItem('userEmail').charAt(0).toUpperCase() : 'U'}
+                        <div className="w-8 h-8 bg-gradient-to-tr from-orange-600 to-amber-600 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-xs text-white shadow-md">
+                            {localStorage.getItem('userEmail') ? localStorage.getItem('userEmail').charAt(0).toUpperCase() : 'S'}
                         </div>
                     )}
                     {!isSidebarCollapsed && <span className={`text-sm font-medium opacity-90 ${theme === 'Light' ? 'text-gray-800' : 'text-white'}`}>User</span>}
-                </button>
+                  </button>
                 </div>
             </div>
         </motion.aside>

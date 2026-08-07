@@ -96,14 +96,14 @@
     font-weight: 500;
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     animation: counter-spin 60s infinite linear; /* Counter rotation to keep text straight */
-    transition: all 0.3s ease;
+    transition: all 0.3s ease-out;
 }
 
 .ai-card:hover {
-    transform: scale(1.15);
+    transform: translateY(-5px) scale(1.03);
     background: #2d2e2f;
-    border-color: #e3e3e3;
-    box-shadow: 0 0 25px rgba(255, 255, 255, 0.1);
+    border-color: #555759;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
     cursor: pointer;
     z-index: 100;
 }

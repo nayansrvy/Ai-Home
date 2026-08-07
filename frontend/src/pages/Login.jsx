@@ -5,10 +5,13 @@ import './Login.css';
 import { auth, googleProvider } from "../firebase-config";
 import { signInWithPopup } from "firebase/auth"; 
 import { ModelIcon } from './Home'; 
+import AccountSwitcherModal from '../components/AccountSwitcherModal';
 
 const Login = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const [profileAvatarSrc, setProfileAvatarSrc] = useState('/avatar_placeholder.png');
   const [error, setError] = useState('');
   const particlesRef = useRef(null);
 
@@ -458,9 +461,8 @@ const Login = () => {
           {/* Left Column Profile Pic with Blue-Purple-Red Gradient border */}
           <div className="flex justify-center md:col-span-1">
             <div className="profile-ring">
-              {/* DUMMY IMAGE PATH - Change the source of avatar below later */}
               <img 
-                src="/logo/profile.png" 
+                src={profileAvatarSrc} 
                 alt="Developer Profile" 
                 className="w-44 h-44 rounded-full object-cover border-4 border-[#131314] bg-[#1e1f20]"
                 onError={(e) => {
